@@ -2,19 +2,19 @@ import os
 import re
 import json
 import logging
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 from datetime import datetime
 
 def parse_version(version_string):
     """Parse version string into numerical version and additional info."""
-    logging.debug(f"Parsing version from string: {version_string}")
+    logging.debug(f"Analizando la versión desde la cadena: {version_string}")
     match = re.match(r'(\d+\.\d+\.\d+\.\d+)(.*)', version_string)
     if match:
         numerical_version = match.group(1)
         additional_info = match.group(2).strip('-')
-        logging.debug(f"Extracted version: {numerical_version}, additional info: {additional_info}")
+        logging.debug(f"Versión extraída: {numerical_version}, información adicional: {additional_info}")
         return Version(numerical_version), additional_info
-    logging.debug(f"Failed to parse version from string: {version_string}")
+    logging.debug(f"No se pudo analizar la versión desde la cadena: {version_string}")
     return None, version_string
 
 def load_json_file(file_path):
@@ -24,12 +24,12 @@ def load_json_file(file_path):
 
 def find_component_name(filename, component_mapping):
     """Find the component name based on the filename using the mapping."""
-    logging.debug(f"Buscando el componente : {filename}")
+    logging.debug(f"Buscando el nombre del componente para el archivo: {filename}")
     for component, filenames in component_mapping.items():
         if filename in filenames:
-            logging.debug(f"Match con el componente: {component} y el archivo : {filename}")
+            logging.debug(f"Componente encontrado: {component} para el archivo: {filename}")
             return component
-    logging.debug(f"No se encuentra el archivo: {filename}")
+    logging.debug(f"No se encontró coincidencia para el archivo: {filename}")
     return None
 
 def is_version_in_range(version, from_version, to_version):
@@ -61,10 +61,10 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
 
     def process_directory(current_path, parent_version=None, parent_info=None):
         """Recursively process directories to find component versions."""
-        logging.debug(f"Processing directory: {current_path}")
+        logging.debug(f"Procesando directorio: {current_path}")
         try:
             items = os.listdir(current_path)
-            logging.debug(f"Contents of {current_path}: {items}")
+            logging.debug(f"Contenido de {current_path}: {items}")
 
             # Extract version from the current directory name if not already provided by parent
             if parent_version is None or parent_info is None:
@@ -75,14 +75,14 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
 
             # Skip processing if version is out of range
             if parent_version and not is_version_in_range(parent_version, from_version, to_version):
-                logging.debug(f"Skipping directory {current_path} with version {parent_version}")
+                logging.debug(f"Omitiendo directorio {current_path} con versión {parent_version}")
                 return
 
             # Process subdirectories first
             for item in items:
                 item_path = os.path.join(current_path, item)
                 if os.path.isdir(item_path):
-                    logging.debug(f"Processing subdirectory: {item_path}")
+                    logging.debug(f"Procesando subdirectorio: {item_path}")
                     process_directory(item_path, parent_version, parent_info)
 
             # Then process files in the current directory
@@ -91,7 +91,7 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
                 if os.path.isfile(item_path):
                     component_name = find_component_name(item, component_mapping)
                     if component_name and (components_to_search == "all" or component_name in components_to_search):
-                        logging.debug(f"File found: {item} in {current_path} with version {parent_version}")
+                        logging.debug(f"Archivo encontrado: {item} en {current_path} con versión {parent_version}")
                         if component_name not in components:
                             components[component_name] = (parent_version, parent_info, current_path)
                         else:
@@ -112,7 +112,7 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
 def generate_report(components, output_file):
     """Generate a report of the latest versions of each component."""
     report_lines = [
-        "Directory\t\tComponent\t\tLatest Version\t\tAdditional Info",
+        "Directorio\t\tComponente\t\tÚltima Versión\t\tInformación Adicional",
         "---------\t\t---------\t\t-------------\t\t---------------"
     ]
     for component, (version, additional_info, directory) in sorted(components.items()):
@@ -147,10 +147,6 @@ if __name__ == "__main__":
     to_version_str = user_config.get("to_version")
     customer = user_config.get("customer")
 
-    # Parse versions
-    from_version = Version(from_version_str) if from_version_str else None
-    to_version = Version(to_version_str) if to_version_str else None
-
     # Configuración del logging
     logging.basicConfig(
         filename=log_file,
@@ -172,19 +168,28 @@ if __name__ == "__main__":
     logging.info(f"Desde versión: {from_version_str}")
     logging.info(f"Hasta versión: {to_version_str}")
 
-    # Load component mapping and customer configurations
+    # Validar las versiones desde y hasta
+    try:
+        from_version = Version(from_version_str) if from_version_str else None
+        to_version = Version(to_version_str) if to_version_str else None
+    except InvalidVersion as e:
+        logging.error(f"Formato de versión inválido en la configuración: {e}")
+        logging.error("Por favor, revise y corrija las versiones en el archivo de configuración.")
+        exit(1)
+
+    # Cargar la configuración de mapeo de componentes y la configuración de clientes
     component_mapping = load_json_file(component_mapping_path)
     customers_config = load_json_file(customers_config_path)
 
-    # Check if customer parameter is present and valid
+    # Verificar si el parámetro customer está presente y es válido
     if customer and customer in customers_config:
-        logging.info(f"Cliente '{customer}' encontrado. Sobreescribiendo los componentes a buscar.")
+        logging.info(f"Cliente '{customer}' encontrado. Sobrescribiendo componentes a buscar.")
         components_to_search = customers_config[customer]
     else:
-        logging.info(f"Cliente '{customer}' no encontrado o no especificado. Usando componentes desde la configuracion general.")
+        logging.info(f"Cliente '{customer}' no encontrado o no proporcionado. Usando componentes de la configuración.")
 
     if components_to_search == "all" or "all" in components_to_search:
-        logging.info("Components to search set to 'all'. Using all components from component mapping.")
+        logging.info("Componentes a buscar establecidos en 'all'. Usando todos los componentes del mapeo de componentes.")
         components_to_search = list(component_mapping.keys())
 
     components = find_latest_versions(base_path, component_mapping, components_to_search, from_version, to_version)
