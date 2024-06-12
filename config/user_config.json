@@ -1,0 +1,11 @@
+{
+    "base_path": "/Users/jimmypimiento/Library/CloudStorage/OneDrive-LatiniaInteractiveBusiness,S.A/Jimmy/utiles/Python/Packaging/pathTest",
+    "components": [ "all"
+    ],
+    "output_file": "output_report1551.txt",
+    "log_file": "log_06072024-1.log",
+    "from_version": "4.19.01.7",
+    "to_version": "4.24.05.7",
+    "log_level": "INFO",
+    "customer" : "AVAL"
+}

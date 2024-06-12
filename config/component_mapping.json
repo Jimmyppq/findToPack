@@ -1,0 +1,63 @@
+{
+    "bus": [
+        "limsp-bus-jee6.ear",
+        "limsp-bus-jee7.ear"     
+    ],
+    "service-customer": [
+        "limspinf-service-customer-jee7.ear",   
+        "limspinf-service-customer.ear"
+    ],
+    "service-storage": [
+        "limspinf-service-storage-jee7.ear",
+        "limspinf-service-storage.ear"
+    ],
+    "authenticator": [
+        "com.latinia.limsp.openliberty.limspUserRegistry-4.23.05.58.jar"
+    ],
+    "ui-oidc" : [
+        "limsp-ui-oidc.ear"
+    ],
+    "ui" : [
+        "limsp-ui.ear"
+    ],
+    "Apple": [
+        "limsp-collector-applehttp2.ear"
+    ],
+    "bus-mo" :[
+        "limsp-bus-mo-jee7.ear"
+    ],
+    "Eclipsoft" : [
+        "limsp-collector-eclipsoft-sms.ear"
+    ],
+    "global-provisioner" :[
+        "limsp-global-provisioner-v4.22.01.28-ol.zip"
+    ],
+    "geo" : [
+        "limspinf-service-geo-jee7.ear",
+        "limspinf-service-geo-jee6.ear"
+    ],
+    "adaptor-rest" : [
+        "limspae-adaptor-rest-jee6.ear"
+    ],
+    "templates" : [
+        "limspinf-service-templates-jee",
+        "limspinf-service-templates-jee7.ear",
+        "limspinf-service-templates-jee6.ear"
+    ],
+    "smpp" : [
+        "limsp-collector-smpp.ear"
+    ],
+    "ldata" : [
+        "limsp3-ldata-was8.ear",
+        "limsp-ldata-ol.ear",
+        "limsp3-ldata-wl12.ear"
+    ],
+    "limspinf-service" : [
+        "limspinf-service-ads-jee7.ear",
+        "limspinf-service-ads-jee6.ear"
+    ],
+    "oracle" : [
+        "oracle.zip",
+        "postgres.zip"
+    ]
+}
