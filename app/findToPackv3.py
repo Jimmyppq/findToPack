@@ -51,13 +51,21 @@ def find_version_directories(base_path, from_version=None, to_version=None):
                 version_dirs.append(item_path)
     return version_dirs
 
-def find_latest_versions(base_path, component_mapping, components_to_search, from_version=None, to_version=None):
+def find_latest_versions(base_path, component_mapping, components_to_search, from_version=None, to_version=None, excluded_dirs=None):
     """Find the latest versions of each component in the directory structure."""
     components = {}
     version_dirs = find_version_directories(base_path, from_version, to_version)
     total_dirs = len(version_dirs)
     
     logging.info(f"Analizando {total_dirs} directorios de versiones desde {from_version} hasta {to_version}")
+
+    def should_exclude_directory(directory_name):
+        """Check if the directory should be excluded based on the configuration."""
+        if excluded_dirs:
+            for excluded in excluded_dirs:
+                if excluded in directory_name:
+                    return True
+        return False
 
     def process_directory(current_path, parent_version=None, parent_info=None):
         """Recursively process directories to find component versions."""
@@ -82,6 +90,9 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
             for item in items:
                 item_path = os.path.join(current_path, item)
                 if os.path.isdir(item_path):
+                    if should_exclude_directory(item):
+                        logging.debug(f"Omitiendo subdirectorio: {item_path}")
+                        continue
                     logging.debug(f"Procesando subdirectorio: {item_path}")
                     process_directory(item_path, parent_version, parent_info)
 
@@ -146,6 +157,7 @@ if __name__ == "__main__":
     from_version_str = user_config.get("from_version")
     to_version_str = user_config.get("to_version")
     customer = user_config.get("customer")
+    excluded_dirs = user_config.get("except", [])
 
     # Configuración del logging
     logging.basicConfig(
@@ -190,9 +202,9 @@ if __name__ == "__main__":
 
     if components_to_search == "all" or "all" in components_to_search:
         logging.info("Componentes a buscar establecidos en 'all'. Usando todos los componentes del mapeo de componentes.")
-        components_to_search = list(component_mapping.keys())
+        components_to_search = list(component_mapping.keys()) 
 
-    components = find_latest_versions(base_path, component_mapping, components_to_search, from_version, to_version)
+    components = find_latest_versions(base_path, component_mapping, components_to_search, from_version, to_version, excluded_dirs)
     generate_report(components, output_file)
 
     end_time = datetime.now()

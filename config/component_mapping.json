@@ -34,7 +34,8 @@
     ],
     "geo" : [
         "limspinf-service-geo-jee7.ear",
-        "limspinf-service-geo-jee6.ear"
+        "limspinf-service-geo-jee6.ear",
+        "limsp-geo.ear"
     ],
     "adaptor-rest" : [
         "limspae-adaptor-rest-jee6.ear"
