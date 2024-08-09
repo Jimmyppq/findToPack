@@ -141,6 +141,17 @@ def generate_report(components, output_file):
     with open(output_file, 'w') as file:
         file.write(report_content)
 
+def write_dataconfig (logger,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str):
+    logger.info ("VERSION 3.4")
+    logger.info(f"Archivo de configuración del usuario: {config_path}")
+    logger.info(f"Archivo de configuración de mapeo de componentes: {component_mapping_path}")
+    logger.info(f"Ruta base para la búsqueda de archivos: {base_path}")
+    logger.info(f"Componentes a buscar: {components_to_search}")
+    logger.info(f"Archivo de salida: {output_file}")
+    logger.info(f"Archivo de log: {log_file}")
+    logger.info(f"Desde versión: {from_version_str}")
+    logger.info(f"Hasta versión: {to_version_str}")
+
 if __name__ == "__main__":
     config_path = "./config/user_config.json"  # Path to the user configuration file
     component_mapping_path = "./config/component_mapping.json"  # Path to the component mapping configuration file
@@ -170,15 +181,8 @@ if __name__ == "__main__":
     start_time = datetime.now()
     logging.info("Inicio de la ejecución del script")
     logging.info(f"Hora de inicio: {start_time}")
+    write_dataconfig (logging,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str)
 
-    logging.info(f"Archivo de configuración del usuario: {config_path}")
-    logging.info(f"Archivo de configuración de mapeo de componentes: {component_mapping_path}")
-    logging.info(f"Ruta base para la búsqueda de archivos: {base_path}")
-    logging.info(f"Componentes a buscar: {components_to_search}")
-    logging.info(f"Archivo de salida: {output_file}")
-    logging.info(f"Archivo de log: {log_file}")
-    logging.info(f"Desde versión: {from_version_str}")
-    logging.info(f"Hasta versión: {to_version_str}")
 
     # Validar las versiones desde y hasta
     try:
@@ -197,6 +201,7 @@ if __name__ == "__main__":
     if customer and customer in customers_config:
         logging.info(f"Cliente '{customer}' encontrado. Sobrescribiendo componentes a buscar.")
         components_to_search = customers_config[customer]
+        logging.info(f"Componentes para el cliente '{customer}': {', '.join(customers_config[customer])}")
     else:
         logging.info(f"Cliente '{customer}' no encontrado o no proporcionado. Usando componentes de la configuración.")
 
