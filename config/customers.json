@@ -1,4 +1,4 @@
 {
-    "AVAL": ["bus", "smpp", "templates"],
+    "AVAL": ["bus", "smpp", "templates","Apple"],
     "BOLIVARIANO": ["Apple", "service-customer", "ldata", "limspinf-service", "geo"]
 }

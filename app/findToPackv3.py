@@ -58,6 +58,7 @@ def find_latest_versions(base_path, component_mapping, components_to_search, fro
     total_dirs = len(version_dirs)
     
     logging.info(f"Analizando {total_dirs} directorios de versiones desde {from_version} hasta {to_version}")
+    logging.info(f"Iniciando búsqueda de componentes {components_to_search} ")
 
     def should_exclude_directory(directory_name):
         """Check if the directory should be excluded based on the configuration."""
@@ -134,15 +135,46 @@ def generate_report(components, output_file):
 
     report_content = "\n".join(report_lines)
 
-    # Print to console
-    #print(report_content)
-
+    output_file = os.path.splitext(output_file)[0] + ".txt"
     # Write to output file
     with open(output_file, 'w') as file:
         file.write(report_content)
 
-def write_dataconfig (logger,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str):
-    logger.info ("VERSION 3.4")
+def generate_report_html(components, output_file):
+    """Generate a report of the latest versions of each component in HTML format."""
+    
+    report_lines = [
+        "<html>",
+        "<head><meta charset='UTF-8'><title>Report</title>",
+        "<style>",
+        "table { border-collapse: collapse; width: 100%; }",
+        "th, td { border: 1px solid black; padding: 8px; text-align: left; }",
+        "th { background-color: #f2f2f2; }",
+        "</style>",
+        "</head>",
+        "<body>",
+        "<table border='1'>",
+        "<tr><th>Directorio</th><th>Componente</th><th>Última Versión</th><th>Información Adicional</th></tr>"
+    ]
+    
+    for component, (version, additional_info, directory) in sorted(components.items()):
+        version_str = version if version else "None"
+        additional_info_str = additional_info if additional_info else "None"
+        line = f"<tr><td>{directory}</td><td>{component}</td><td>{version_str}</td><td>{additional_info_str}</td></tr>"
+        report_lines.append(line)
+    
+    report_lines.append("</table>")
+    report_lines.append("</body>")
+    report_lines.append("</html>")
+    
+    report_content = "\n".join(report_lines)
+    output_file = os.path.splitext(output_file)[0] + ".html"
+    # Write to output file
+    with open(output_file, 'w',encoding='utf-8') as file:
+        file.write(report_content)
+
+def write_dataconfig (logger,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str,html):
+    logger.info ("VERSION 3.6")
     logger.info(f"Archivo de configuración del usuario: {config_path}")
     logger.info(f"Archivo de configuración de mapeo de componentes: {component_mapping_path}")
     logger.info(f"Ruta base para la búsqueda de archivos: {base_path}")
@@ -151,6 +183,7 @@ def write_dataconfig (logger,config_path,component_mapping_path,base_path,compon
     logger.info(f"Archivo de log: {log_file}")
     logger.info(f"Desde versión: {from_version_str}")
     logger.info(f"Hasta versión: {to_version_str}")
+    logger.info(f"Salida HTML: {html}")
 
 if __name__ == "__main__":
     config_path = "./config/user_config.json"  # Path to the user configuration file
@@ -169,6 +202,7 @@ if __name__ == "__main__":
     to_version_str = user_config.get("to_version")
     customer = user_config.get("customer")
     excluded_dirs = user_config.get("except", [])
+    html = user_config.get("output_html", "true").strip().lower() in ["true", "1", "yes", "y", "on"]
 
     # Configuración del logging
     logging.basicConfig(
@@ -181,7 +215,7 @@ if __name__ == "__main__":
     start_time = datetime.now()
     logging.info("Inicio de la ejecución del script")
     logging.info(f"Hora de inicio: {start_time}")
-    write_dataconfig (logging,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str)
+    write_dataconfig (logging,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str,html)
 
 
     # Validar las versiones desde y hasta
@@ -210,7 +244,12 @@ if __name__ == "__main__":
         components_to_search = list(component_mapping.keys()) 
 
     components = find_latest_versions(base_path, component_mapping, components_to_search, from_version, to_version, excluded_dirs)
-    generate_report(components, output_file)
+    
+    if html : 
+        generate_report_html(components, output_file)
+    else :
+        generate_report(components, output_file)
+   
 
     end_time = datetime.now()
     logging.info(f"Hora de finalización: {end_time}")

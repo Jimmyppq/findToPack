@@ -1,0 +1,11 @@
+*.ear
+oldsrc
+pathTest
+*.log
+*.txt
+*v2*
+*.txt
+*.html
+output
+*.json
+config
