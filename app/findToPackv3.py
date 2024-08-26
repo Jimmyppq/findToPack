@@ -153,7 +153,7 @@ def generate_report_html(components, output_file):
         "</style>",
         "</head>",
         "<body>",
-        "<table border='1'>",
+        "<table border='0'>",
         "<tr><th>Directorio</th><th>Componente</th><th>Última Versión</th><th>Información Adicional</th></tr>"
     ]
     
@@ -174,7 +174,7 @@ def generate_report_html(components, output_file):
         file.write(report_content)
 
 def write_dataconfig (logger,config_path,component_mapping_path,base_path,components_to_search,output_file,log_file,from_version_str,to_version_str,html):
-    logger.info ("VERSION 3.6")
+    logger.info ("VERSION 3.9")
     logger.info(f"Archivo de configuración del usuario: {config_path}")
     logger.info(f"Archivo de configuración de mapeo de componentes: {component_mapping_path}")
     logger.info(f"Ruta base para la búsqueda de archivos: {base_path}")
